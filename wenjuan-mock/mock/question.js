@@ -1,10 +1,54 @@
 const Mock = require('mockjs')
 const getQuestionList = require('./data/getQuestionList')
 const getComponentList = require('./data/getComponentList')
-
+const chatGPTService = require('../services/chatgpt')
 const Random = Mock.Random
 
 module.exports = [
+    {//LLM
+        url:'/api/question/llm/:id',
+        method: 'post', 
+        async response(ctx) {
+            const { llm } = ctx.request.body
+            try {
+                // 使用ChatGPT生成组件列表
+                const componentList = await chatGPTService.generateQuestionnaireComponents(llm)
+                
+                return {
+                    errno: 0,
+                    data: {
+                        id: ctx.params.id,
+                        title: Random.ctitle(),
+                        desc: 'AI生成的问卷描述',
+                        js: '',
+                        css: '',
+                        isDeleted: false,
+                        isPublished: true,
+                        componentList: componentList
+                    }
+                }
+            } catch (error) {
+                console.error('生成问卷组件失败:', error)
+                return {
+                    errno: 0,
+                    data: {
+                        id: Random.id(),
+                        title: Random.ctitle(),
+                        desc: '问卷描述',
+                        js: '',
+                        css: '',
+                        isDeleted: false,
+                        isPublished: true,
+                        componentList: getComponentList()
+                    }
+    
+                    // errno: 1002,
+                    // msg: '错误测试'
+                }
+            }
+           
+        }
+    },
     {
         // 获取单个问卷信息
         url: '/api/question/:id',

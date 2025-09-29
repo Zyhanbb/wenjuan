@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { getToken } from '../utils/user-token'
 
 const instance = axios.create({
-  timeout: 10 * 1000,
+  timeout: 50 * 1000,
 })
 
 // request 拦截：每次请求都带上 token

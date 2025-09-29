@@ -1,6 +1,6 @@
 /**
  * @description 生成组件列表
- * @author 双越老师
+
  */
 
 const Mock = require('mockjs')
@@ -99,6 +99,7 @@ function getComponentList() {
               }
         }
     ]
+    
 }
 
 module.exports = getComponentList

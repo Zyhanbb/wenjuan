@@ -9,6 +9,15 @@ type SearchOption = {
   pageSize: number
 }
 
+export async function getQuestionServiceByLLM(
+  id: string,
+  llm: string | null
+): Promise<ResDataType> {
+  const url = `/api/question/llm/${id}`
+  const data = (await axios.post(url, { llm })) as ResDataType
+  return data
+}
+
 // 获取单个问卷信息
 export async function getQuestionService(id: string): Promise<ResDataType> {
   const url = `/api/question/${id}`

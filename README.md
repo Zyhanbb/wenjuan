@@ -1,6 +1,6 @@
 # 问卷系统 (Wenjuan Survey System)
 
-一个功能完整的在线问卷调研系统，采用前后端分离架构，支持问卷创建、编辑、发布、数据收集和统计分析。
+一个功能完整的在线问卷调研系统，采用前后端分离架构，支持问卷创建、编辑、发布、数据收集和统计分析。集成AI智能生成功能，可根据用户需求自动生成问卷模板，大幅提升问卷创建效率。
 
 ## 🏗️ 系统架构
 
@@ -10,9 +10,15 @@
 wenjuan/
 ├── wenjuan-fe/           # 问卷管理后台 (React + TypeScript)
 ├── wenjuan-client/       # 问卷填写客户端 (Next.js)
-├── wenjuan-mock/         # 模拟后端服务 (Koa + Mock.js)
+├── wenjuan-mock/         # 模拟后端服务 (Koa + Mock.js + AI服务)
 └── README.md            # 项目整体说明
 ```
+
+### 模块职责
+
+- **wenjuan-fe**: 问卷管理后台，提供问卷创建、编辑、发布、统计等功能，集成AI生成功能
+- **wenjuan-client**: 问卷填写端，用户填写问卷的界面
+- **wenjuan-mock**: 后端服务，提供API接口、数据模拟和AI智能生成服务
 
 ## 🎯 核心功能
 
@@ -27,6 +33,7 @@ wenjuan/
 - ✅ 问卷搜索和筛选
 - ✅ 问卷复制、发布、删除
 - ✅ 问卷模板管理
+- ✅ AI智能生成问卷模板（基于用户需求自动生成问卷结构）
 
 ### 问卷填写
 - ✅ 响应式问卷页面
@@ -54,6 +61,9 @@ wenjuan/
 - **Koa 2** - Node.js Web 框架
 - **Mock.js** - 数据模拟
 - **Node.js** - 运行时环境
+- **OpenAI API** - AI智能生成服务
+- **Axios** - HTTP 客户端
+- **JSON5** - JSON 解析库
 
 ## 📁 项目结构
 
@@ -89,6 +99,8 @@ wenjuan/
 │   │   ├── question.js          # 问卷接口
 │   │   ├── stat.js              # 统计接口
 │   │   └── data/                # 数据生成器
+│   ├── services/                # AI 服务模块
+│   │   └── chatgpt.js           # ChatGPT API 服务
 │   ├── index.js                 # 服务入口
 │   └── README.md
 └── README.md                     # 项目整体说明
@@ -99,6 +111,7 @@ wenjuan/
 ### 环境要求
 - Node.js >= 16.0.0
 - npm >= 8.0.0
+- OpenAI API Key（可选，用于AI生成功能）
 
 ### 安装依赖
 
@@ -115,6 +128,17 @@ npm install
 cd ../wenjuan-mock
 npm install
 ```
+
+### 环境变量配置
+
+在 `wenjuan-mock` 目录下创建 `.env` 文件，配置 OpenAI API Key：
+
+```bash
+# wenjuan-mock/.env
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+**注意**：如果不配置 API Key，系统将使用模拟数据生成问卷模板。
 
 ### 启动所有服务
 
@@ -148,6 +172,16 @@ npm run dev
 1. 用户在管理后台创建问卷
 2. 调用 wenjuan-mock 的创建接口
 3. 返回问卷ID，跳转到编辑页面
+
+### 1.1 AI智能生成流程
+```
+用户输入需求 → wenjuan-fe → wenjuan-mock → AI服务 → 生成问卷模板
+```
+
+1. 用户点击创建问卷，输入需求描述
+2. 前端调用AI生成接口 `/api/question/llm/:id`
+3. 后端调用OpenAI API生成问卷组件列表
+4. 返回生成的问卷模板，用户可直接编辑
 
 ### 2. 问卷编辑流程
 ```
@@ -218,6 +252,48 @@ interface ApiResponse {
 #### 答案提交
 - `POST /api/answer` - 提交问卷答案
 
+#### AI生成相关
+
+##### AI智能生成问卷模板
+```http
+POST /api/question/llm/:id
+```
+
+**请求体：**
+```json
+{
+  "llm": "用户需求描述"
+}
+```
+
+**响应示例：**
+```json
+{
+  "errno": 0,
+  "data": {
+    "id": "question_001",
+    "title": "AI生成的问卷标题",
+    "desc": "AI生成的问卷描述",
+    "componentList": [
+      {
+        "fe_id": "c1",
+        "type": "questionInfo",
+        "title": "问卷信息",
+        "props": {
+          "title": "问卷标题",
+          "desc": "问卷描述"
+        }
+      }
+    ]
+  }
+}
+```
+
+**功能说明：**
+- 根据用户输入的需求描述，使用AI自动生成问卷模板
+- 支持生成多种题型：单选、多选、输入框、文本域等
+- 当API Key未配置时，自动降级为模拟数据生成
+
 ## 🎨 组件系统
 
 ### 问卷组件类型
@@ -265,10 +341,19 @@ REACT_APP_API_URL=http://localhost:3001
 
 # wenjuan-client/.env.local
 NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# wenjuan-mock/.env
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 #### 跨域配置
 wenjuan-mock 已配置 CORS 支持跨域请求。
+
+#### AI功能开发
+- **AI服务模块**: `wenjuan-mock/services/chatgpt.js`
+- **API接口**: `POST /api/question/llm/:id`
+- **前端组件**: `wenjuan-fe/src/components/QuestionTitleModal.tsx`
+- **降级策略**: 当API Key未配置时，自动使用模拟数据生成问卷模板
 
 ### 代码规范
 - ESLint + Prettier 代码格式化

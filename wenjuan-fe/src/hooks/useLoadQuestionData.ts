@@ -2,19 +2,27 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useRequest } from 'ahooks'
 import { useDispatch } from 'react-redux'
-import { getQuestionService } from '../services/question'
+import { getQuestionService, getQuestionServiceByLLM } from '../services/question'
 import { resetComponents } from '../store/componentsReducer'
 import { resetPageInfo } from '../store/pageInfoReducer'
+import { useSelector } from 'react-redux'
 
 function useLoadQuestionData() {
   const { id = '' } = useParams()
   const dispatch = useDispatch()
-
+  // 使用 redux 中的 pageInfo 数据
+  const { enterFrom = '', llm = '' } = useSelector((state: any) => state.pageInfo)
   // ajax 加载
   const { data, loading, error, run } = useRequest(
-    async (id: string) => {
+    async (id: string, llm: string | null, enterFrom: string | null): Promise<any> => {
       if (!id) throw new Error('没有问卷 id')
-      const data = await getQuestionService(id)
+      let data
+      if (enterFrom === 'confirm') {
+        data = await getQuestionServiceByLLM(id, llm)
+      } else {
+        // 这里假设 getQuestionServiceByLLM 已经被正确导入
+        data = await getQuestionService(id)
+      }
       return data
     },
     {
@@ -33,6 +41,8 @@ function useLoadQuestionData() {
       css = '',
       isPublished = false,
       componentList = [],
+      enterFrom = '',
+      llm = '',
     } = data
 
     // 获取默认的 selectedId
@@ -45,12 +55,12 @@ function useLoadQuestionData() {
     dispatch(resetComponents({ componentList, selectedId, copiedComponent: null }))
 
     // 把 pageInfo 存储到 redux store
-    dispatch(resetPageInfo({ title, desc, js, css, isPublished }))
+    dispatch(resetPageInfo({ title, desc, js, css, isPublished, enterFrom, llm }))
   }, [data])
 
   // 判断 id 变化，执行 ajax 加载问卷数据
   useEffect(() => {
-    run(id)
+    run(id, llm, enterFrom)
   }, [id])
 
   return { loading, error }

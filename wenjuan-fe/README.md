@@ -16,6 +16,7 @@
 - ✅ 问卷复制功能
 - ✅ 问卷发布/下线
 - ✅ 问卷删除（软删除/彻底删除）
+- ✅ AI智能生成问卷模板（基于用户需求自动生成问卷结构）
 
 ### 问卷编辑器
 - ✅ 拖拽式组件编辑器
@@ -26,6 +27,7 @@
 - ✅ 实时预览
 - ✅ 撤销/重做功能
 - ✅ 组件属性配置
+- ✅ AI智能生成组件（根据需求自动生成问卷组件）
 
 ### 数据统计
 - ✅ 答卷数据收集
@@ -52,6 +54,7 @@ wenjuan-fe/
 │   ├── components/          # 通用组件
 │   │   ├── QuestionComponents/  # 问卷组件库
 │   │   ├── DragSortable/        # 拖拽排序组件
+│   │   ├── QuestionTitleModal.tsx # AI生成问卷弹窗
 │   │   └── ...
 │   ├── pages/              # 页面组件
 │   │   ├── Home.tsx        # 首页
@@ -67,7 +70,7 @@ wenjuan-fe/
 │   ├── services/           # API 服务
 │   │   ├── ajax.ts        # HTTP 请求封装
 │   │   ├── user.ts        # 用户相关接口
-│   │   ├── question.ts   # 问卷相关接口
+│   │   ├── question.ts   # 问卷相关接口（包含AI生成接口）
 │   │   └── stat.ts       # 统计相关接口
 │   ├── store/             # Redux 状态管理
 │   │   ├── index.ts       # Store 配置
@@ -180,8 +183,13 @@ npm run storybook
 所有 API 请求都通过 `services` 目录下的服务文件进行封装：
 
 - `services/user.ts` - 用户相关接口
-- `services/question.ts` - 问卷相关接口
+- `services/question.ts` - 问卷相关接口（包含AI生成接口）
 - `services/stat.ts` - 统计相关接口
+
+### AI生成相关接口
+
+- `getQuestionServiceByLLM(id, llm)` - 调用AI生成问卷模板
+- 支持降级策略：当AI服务不可用时自动使用模拟数据
 
 ### 样式规范
 
@@ -193,9 +201,15 @@ npm run storybook
 
 ### 问卷编辑流程
 1. 用户创建问卷 → 调用 `createQuestionService`
-2. 加载问卷数据 → 调用 `getQuestionService`
+2. 加载问卷数据 → 调用 `getQuestionService` 或 `getQuestionServiceByLLM`（AI生成）
 3. 编辑组件 → 更新 Redux 状态
 4. 保存问卷 → 调用 `updateQuestionService`
+
+### AI生成流程
+1. 用户点击创建问卷 → 显示 `QuestionTitleModal` 弹窗
+2. 用户输入需求描述 → 调用 `getQuestionServiceByLLM`
+3. 后端调用AI服务生成问卷模板 → 返回组件列表
+4. 前端加载生成的问卷模板 → 进入编辑模式
 
 ### 数据统计流程
 1. 加载问卷数据 → 调用 `getQuestionService`
