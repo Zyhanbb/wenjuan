@@ -483,9 +483,6 @@ npm start
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
 
-## 📄 许可证
-
-本项目采用 MIT 许可证。
 
 ## 📞 联系方式
 
