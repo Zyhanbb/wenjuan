@@ -24,19 +24,19 @@ wenjuan/
 
 #### 主页面：
 
-![](C:\Users\sdu\AppData\Roaming\marktext\images\2025-09-29-10-59-30-image.png)
+![](images/2025-09-29-10-59-30-image.png)
 
 #### 问卷通用模板：
 
-![](C:\Users\sdu\AppData\Roaming\marktext\images\2025-09-29-11-01-29-image.png)
+![](images/2025-09-29-11-01-29-image.png)
 
 #### AI辅助：
 
-![](C:\Users\sdu\AppData\Roaming\marktext\images\2025-09-29-11-02-38-image.png)
+![](images/2025-09-29-11-02-38-image.png)
 
 #### AI辅助基础模板
 
-![](C:\Users\sdu\AppData\Roaming\marktext\images\2025-09-29-11-04-16-image.png)
+![](images/2025-09-29-11-04-16-image.png)
 
 ## 🎯 核心功能
 
